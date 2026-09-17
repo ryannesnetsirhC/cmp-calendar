@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMP Monthly Financial Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="logo-placeholder.svg" alt="California Montessori Project" class="brand-logo" />
+        <div class="brand-text">
+          <h1>Key Dates Calendar</h1>
+          <p>California Montessori Project &middot; School Finance</p>
+        </div>
+      </div>
+      <nav class="view-nav">
+        <a href="index.html">Calendar</a>
+        <a href="table.html" class="active">Table View</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page table-page">
+    <section class="table-panel">
+      <div class="table-panel-header">
+        <h2 id="tableTitle">Monthly Financial Calendar</h2>
+        <span id="tableUpdated" class="table-updated"></span>
+      </div>
+
+      <div class="table-scroll">
+        <table class="grid-table">
+          <thead>
+            <tr id="theadLabels"></tr>
+            <tr id="theadOwners"></tr>
+            <tr id="theadCadence"></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <p class="table-footnote" id="tableFootnote"></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Questions about any date on this calendar? Reach out any time.</p>
+  </footer>
+
+  <script src="table-data.js"></script>
+  <script src="table.js"></script>
+</body>
+</html>

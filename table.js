@@ -28,8 +28,12 @@
   function monthNameOf(date) {
     return MONTH_NAMES[date.getMonth()];
   }
+  const MONTH_ABBR = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
   function formatShort(date) {
-    return `${date.getMonth() + 1}/${date.getDate()}`;
+    return `${MONTH_ABBR[date.getMonth()]} ${date.getDate()}`;
   }
 
   // Roll Sat/Sun back to the preceding Friday. Returns {date, adjusted}.
@@ -78,11 +82,19 @@
     const materials = rollToFriday(rawMaterials);
     const rawFinalReview = addDays(rawMaterials, -2);
     const finalReview = rollToFriday(rawFinalReview);
+    const rawFinancialReview = addDays(rawFinalReview, -7);
+    const financialReview = rollToFriday(rawFinancialReview);
 
     const bucket = rows[monthNameOf(meeting)];
     bucket.boardMeeting.push({ date: meeting, adjusted: false });
     bucket.boardMaterials.push(materials);
     bucket.finalFinancialReview.push(finalReview);
+    bucket.financialReview.push(financialReview);
+  });
+
+  ANCHORS.staffingModel.forEach((iso) => {
+    const sm = parseISO(iso);
+    rows[monthNameOf(sm)].staffingModel.push({ date: sm, adjusted: false });
   });
 
   ANCHORS.financeCommittee.forEach((iso) => {

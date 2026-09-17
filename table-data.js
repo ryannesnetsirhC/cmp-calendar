@@ -9,18 +9,19 @@
  *   - Final Financial Review = Board Materials Ready minus 2 days
  *   - FC Materials Ready     = Finance Committee date minus 1 day
  *   - Documents Due to Vertex = Accounting Close date minus 6 days
+ *   - Financial Review = Final Financial Review date minus 7 days
  * If a calculated date lands on a Saturday or Sunday, it's automatically
  * rolled back to the preceding Friday (marked with * in the table).
  * If a calculated OR given date lands on a known school holiday, it's
  * marked with † (shown, not moved).
  *
- * TO UPDATE: add/edit dates in the three arrays below ("YYYY-MM-DD").
+ * TO UPDATE: add/edit dates in the arrays below ("YYYY-MM-DD").
  * Nothing else in this file needs to change.
  *
- * Still blank this round (no data given yet) — Staffing Model Updates
- * Due, Financial Review, Principal Meeting (and therefore Principal
- * Materials Ready, which depends on it), Payroll/HR Check In, and
- * Coding Check In. Add data for these the same way once you have it.
+ * Still blank this round (no data given yet) — Principal Meeting (and
+ * therefore Principal Materials Ready, which depends on it), Payroll/HR
+ * Check In, and Coding Check In. Add data for these the same way once
+ * you have it.
  */
 
 const ANCHORS = {
@@ -35,6 +36,10 @@ const ANCHORS = {
   accountingClose: [
     "2026-08-24", "2026-09-18", "2026-10-12", "2026-11-13",
     // Add Dec 2026 – Jun 2027 accounting close dates here once you have them.
+  ],
+  staffingModel: [
+    "2026-09-15", "2026-10-12",
+    // Add more Staffing Model Updates Due dates here once you have them.
   ],
 };
 
@@ -57,7 +62,7 @@ const HOLIDAYS = {
 const TABLE_META = {
   title: "2026-27 CMP Monthly Financial Calendar",
   updated: "",
-  footnote: "Board Meetings: 9am\u201312pm  \u2022  * = moved from a weekend to the prior Friday   \u2020 = falls on a school holiday",
+  footnote: "Board Meetings: 9am–12pm  •  * = moved from a weekend to the prior Friday   † = falls on a school holiday",
 };
 
 // Column order, left to right. "role" tags which position-type filter

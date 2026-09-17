@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CMP Key Dates Calendar</title>
+  <title>CMP Monthly Financial Calendar</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -17,30 +17,34 @@
         </div>
       </div>
       <nav class="view-nav">
-        <a href="index.html" class="active">Calendar</a>
-        <a href="table.html">Table View</a>
+        <a href="index.html">Calendar</a>
+        <a href="table.html" class="active">Table View</a>
       </nav>
     </div>
   </header>
 
-  <main class="page">
-    <section class="calendar-panel">
-      <div class="calendar-toolbar">
-        <button id="prevMonth" class="nav-btn" aria-label="Previous month">&larr;</button>
-        <h2 id="monthLabel">Month Year</h2>
-        <button id="nextMonth" class="nav-btn" aria-label="Next month">&rarr;</button>
+  <main class="page table-page">
+    <section class="table-panel">
+      <div class="table-panel-header">
+        <h2 id="tableTitle">Monthly Financial Calendar</h2>
+        <span id="tableUpdated" class="table-updated"></span>
       </div>
 
-      <div class="weekday-row" id="weekdayRow"></div>
-      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="filter-bar" id="filterBar"></div>
 
-      <div class="legend" id="legend"></div>
+      <div class="table-scroll" id="tableScroll">
+        <table class="grid-table">
+          <thead>
+            <tr id="theadLabels"></tr>
+            <tr id="theadOwners"></tr>
+            <tr id="theadCadence"></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <p class="table-footnote" id="tableFootnote"></p>
     </section>
-
-    <aside class="upcoming-panel">
-      <h2>Upcoming Dates</h2>
-      <ul class="upcoming-list" id="upcomingList"></ul>
-    </aside>
   </main>
 
   <footer class="site-footer">
@@ -49,7 +53,6 @@
 
   <script src="table-data.js"></script>
   <script src="schedule.js"></script>
-  <script src="events.js"></script>
-  <script src="script.js"></script>
+  <script src="table.js"></script>
 </body>
 </html>

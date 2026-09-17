@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMP Key Dates Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="assets/logo-placeholder.svg" alt="California Montessori Project" class="brand-logo" />
+        <div class="brand-text">
+          <h1>Key Dates Calendar</h1>
+          <p>California Montessori Project &middot; School Finance</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="calendar-panel">
+      <div class="calendar-toolbar">
+        <button id="prevMonth" class="nav-btn" aria-label="Previous month">&larr;</button>
+        <h2 id="monthLabel">Month Year</h2>
+        <button id="nextMonth" class="nav-btn" aria-label="Next month">&rarr;</button>
+      </div>
+
+      <div class="weekday-row" id="weekdayRow"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <aside class="upcoming-panel">
+      <h2>Upcoming Dates</h2>
+      <ul class="upcoming-list" id="upcomingList"></ul>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <p>Questions about any date on this calendar? Reach out any time.</p>
+  </footer>
+
+  <script src="events.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

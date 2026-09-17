@@ -75,7 +75,7 @@
       const eventsHtml = dayEvents
         .map((ev) => {
           const color = (CATEGORIES[ev.category] || CATEGORIES.other).color;
-          return `<div class="day-event" style="background:${color}" title="${ev.title}">${ev.title}</div>`;
+          return `<div class="day-event-wrap" data-tooltip="${ev.title}" tabindex="0" aria-label="${ev.title}"><span class="day-event" style="background:${color}">${ev.title}</span></div>`;
         })
         .join("");
 

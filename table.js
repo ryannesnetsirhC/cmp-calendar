@@ -1,10 +1,30 @@
 /**
  * Builds the grid from computeCycles() (schedule.js), buckets everything
  * into month rows, and renders the table — including the weekend/holiday
- * markers and the role filter. No date math lives here; see schedule.js.
+ * markers, due-soon highlighting, and the role filter. No date math lives
+ * here; see schedule.js.
  */
 (function () {
   const { boardCycles, fcCycles, acctCycles, staffingModel } = computeCycles();
+
+  // ---- Due-soon highlighting ----
+  // Compares each date to today (whenever the page happens to be opened) —
+  // no fixed dates here, so this stays correct every day on its own.
+  const TODAY = new Date();
+
+  function daysUntil(date) {
+    const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const t = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+    return Math.round((d - t) / 86400000);
+  }
+
+  function urgencyClass(date) {
+    const days = daysUntil(date);
+    if (days < 0) return "";
+    if (days <= 5) return "due-soon due-orange";
+    if (days <= 10) return "due-soon due-yellow";
+    return "";
+  }
 
   // Renders one date as an HTML snippet with * / † markers + tooltips.
   function renderDate(date, adjusted) {
@@ -12,7 +32,8 @@
     let html = formatShort(date);
     if (adjusted) html += `<sup class="mk mk-wknd" title="Moved from a weekend to this Friday">*</sup>`;
     if (holiday) html += `<sup class="mk mk-holiday" title="${holiday}">&dagger;</sup>`;
-    return html;
+    const cls = urgencyClass(date);
+    return cls ? `<span class="${cls}">${html}</span>` : html;
   }
 
   function renderCell(dates) {

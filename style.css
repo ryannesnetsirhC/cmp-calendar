@@ -158,6 +158,7 @@ body {
 
 .day-cell {
   min-height: 84px;
+  min-width: 0;
   border: 1px solid var(--cmp-border);
   border-radius: 8px;
   padding: 6px;
@@ -192,6 +193,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .legend {
@@ -387,6 +389,22 @@ body {
 }
 .mk-wknd { color: var(--cmp-gold); }
 .mk-holiday { color: #8E5A9E; }
+
+/* Due-soon highlighting (Table View) */
+.due-soon {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.due-yellow {
+  background: #FDE68A;
+  color: #7A5B00;
+}
+.due-orange {
+  background: #FDBA74;
+  color: #7A3300;
+}
 
 /* Role filter: hide columns not tagged for the active role */
 .table-scroll.filter-active .col-none,

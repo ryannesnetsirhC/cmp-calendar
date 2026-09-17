@@ -62,7 +62,7 @@ const HOLIDAYS = {
 const TABLE_META = {
   title: "2026-27 CMP Monthly Financial Calendar",
   updated: "",
-  footnote: "Board Meetings: 9am–12pm  •  * = moved from a weekend to the prior Friday   † = falls on a school holiday",
+        footnote: "Board Meetings: 9am–12pm  •  * = moved from a weekend to the prior Friday   † = falls on a school holiday  •  🟧 due within 5 days   🟨 due within 10 days",
 };
 
 // Column order, left to right. "role" tags which position-type filter

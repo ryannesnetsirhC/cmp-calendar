@@ -1,165 +1,93 @@
 /**
- * TABLE VIEW DATA
- * ---------------
- * Drives table.html — a spreadsheet-style grid (months as rows,
- * activity types as columns), matching the layout of the CMP Monthly
- * Financial Calendar.
+ * TABLE VIEW DATA — 2026-27 school year
+ * --------------------------------------
+ * This file holds only the real "anchor" dates you gave us. Everything
+ * else (Board Materials Ready, Final Financial Review, FC Materials
+ * Ready, Documents Due to Vertex) is CALCULATED from these anchors by
+ * table.js using the rules you specified:
+ *   - Board Materials Ready  = Board Meeting date  minus 3 days
+ *   - Final Financial Review = Board Materials Ready minus 2 days
+ *   - FC Materials Ready     = Finance Committee date minus 1 day
+ *   - Documents Due to Vertex = Accounting Close date minus 6 days
+ * If a calculated date lands on a Saturday or Sunday, it's automatically
+ * rolled back to the preceding Friday (marked with * in the table).
+ * If a calculated OR given date lands on a known school holiday, it's
+ * marked with † (shown, not moved).
  *
- * This was transcribed from a screenshot of that spreadsheet, so a
- * few cells need your eyes before this goes to a client:
- *   - July / "Documents due to EdTec": source showed #VALUE! (a
- *     formula error in the original sheet) — left blank here.
- *   - September / "Documents due to EdTec": source column was too
- *     narrow to read (showed ###########) — left blank here.
- *   - April / "Coding Check In": source showed "22-Jan", which looks
- *     out of place in an April row — double check this one.
- *   - The original had a second, empty "August" row right after the
- *     filled-in one; it looked like a stray blank row, so it's not
- *     included here. Add it back if it was intentional.
- * Everything else was legible and transcribed as shown.
+ * TO UPDATE: add/edit dates in the three arrays below ("YYYY-MM-DD").
+ * Nothing else in this file needs to change.
+ *
+ * Still blank this round (no data given yet) — Staffing Model Updates
+ * Due, Financial Review, Principal Meeting (and therefore Principal
+ * Materials Ready, which depends on it), Payroll/HR Check In, and
+ * Coding Check In. Add data for these the same way once you have it.
  */
 
-const TABLE_META = {
-  title: "2025-26 CMP Monthly Financial Calendar",
-  updated: "10/21/2025",
-  footnote: "Board Meetings: 9am–12pm",
+const ANCHORS = {
+  boardMeetings: [
+    "2026-10-12", "2026-11-09", "2026-11-14", "2026-12-14", "2027-01-11",
+    "2027-02-08", "2027-03-08", "2027-04-12", "2027-05-10", "2027-06-07",
+    "2027-06-21",
+  ],
+  financeCommittee: [
+    "2026-09-10", "2026-12-09", "2027-03-04", "2027-05-06", "2027-06-10",
+  ],
+  accountingClose: [
+    "2026-08-24", "2026-09-18", "2026-10-12", "2026-11-13",
+    // Add Dec 2026 – Jun 2027 accounting close dates here once you have them.
+  ],
 };
 
-// Column order matches the source sheet, left to right.
+// Common school-calendar holidays for this range — used only to flag
+// dates with a †, never to move them. Add more if you spot a collision.
+const HOLIDAYS = {
+  "2026-09-07": "Labor Day",
+  "2026-11-11": "Veterans Day",
+  "2026-11-26": "Thanksgiving",
+  "2026-11-27": "Day after Thanksgiving",
+  "2026-12-25": "Christmas Day",
+  "2027-01-01": "New Year's Day",
+  "2027-01-18": "MLK Day (observed)",
+  "2027-02-15": "Presidents Day (observed)",
+  "2027-03-31": "Cesar Chavez Day",
+  "2027-05-31": "Memorial Day",
+  "2027-06-19": "Juneteenth",
+};
+
+const TABLE_META = {
+  title: "2026-27 CMP Monthly Financial Calendar",
+  updated: "",
+  footnote: "Board Meetings: 9am\u201312pm  \u2022  * = moved from a weekend to the prior Friday   \u2020 = falls on a school holiday",
+};
+
+// Column order, left to right. "role" tags which position-type filter
+// a column belongs to (null = only shows under "All").
 const TABLE_COLUMNS = [
-  { key: "docsToEdTec", label: "Documents due to EdTec", owner: "Kosha/AP, SpEd", cadence: "5 Days Prior" },
-  { key: "acctClose", label: "Accounting Close", owner: "EdTec", cadence: "Varies" },
-  { key: "staffingModel", label: "Staffing Model Updates Due", owner: "HR", cadence: "" },
-  { key: "financialReview", label: "Financial Review", owner: "Varies", cadence: "Wednesday" },
-  { key: "principalMaterials", label: "Principal Materials Ready", owner: "EdTec", cadence: "Thursday" },
-  { key: "principalMeeting", label: "Principal Meeting", owner: "EdTec, Principals", cadence: "Friday" },
-  { key: "financeCommitteeMaterials", label: "Finance Committee Materials Ready", owner: "EdTec", cadence: "Tuesday" },
-  { key: "finalFinancialReview", label: "Final Financial Review", owner: "Matt/EdTec", cadence: "Wednesday" },
-  { key: "financeCommittee", label: "Finance Committee", owner: "EdTec, Finance Committee", cadence: "Thursday" },
-  { key: "boardMaterials", label: "Board Materials Ready", owner: "EdTec", cadence: "Friday" },
-  { key: "boardMeeting", label: "Board Meeting", owner: "", cadence: "Monday" },
-  { key: "payrollCheckIn", label: "Payroll/HR Check In", owner: "Sinnai/Meghan/EdTec", cadence: "" },
-  { key: "codingCheckIn", label: "Coding Check In", owner: "Kosha/EdTec", cadence: "" },
+  { key: "docsToVertex", label: "Documents due to Vertex", owner: "Kosha/AP, SpEd", cadence: "6 Days Prior", role: "koshaap" },
+  { key: "acctClose", label: "Accounting Close", owner: "EdTec", cadence: "Varies", role: null },
+  { key: "staffingModel", label: "Staffing Model Updates Due", owner: "HR", cadence: "", role: "hr" },
+  { key: "financialReview", label: "Financial Review", owner: "Varies", cadence: "Wednesday", role: null },
+  { key: "principalMaterials", label: "Principal Materials Ready", owner: "EdTec", cadence: "Thursday", role: "principals" },
+  { key: "principalMeeting", label: "Principal Meeting", owner: "EdTec, Principals", cadence: "Friday", role: "principals" },
+  { key: "financeCommitteeMaterials", label: "Finance Committee Materials Ready", owner: "EdTec", cadence: "1 Day Prior", role: null },
+  { key: "finalFinancialReview", label: "Final Financial Review", owner: "Matt/EdTec", cadence: "", role: "matt" },
+  { key: "financeCommittee", label: "Finance Committee", owner: "EdTec, Finance Committee", cadence: "", role: null },
+  { key: "boardMaterials", label: "Board Materials Ready", owner: "EdTec", cadence: "3 Days Prior", role: null },
+  { key: "boardMeeting", label: "Board Meeting", owner: "", cadence: "", role: null },
+  { key: "payrollCheckIn", label: "Payroll/HR Check In", owner: "Sinnai/Meghan/EdTec", cadence: "", role: "hr" },
+  { key: "codingCheckIn", label: "Coding Check In", owner: "Kosha/EdTec", cadence: "", role: "koshaap" },
 ];
 
-// highlight: "row"  -> whole row shaded (major board deliverable months)
-//            "note" -> just the Notes cell shaded (no-presentation months)
-//            null   -> no shading
-const TABLE_MONTHS = [
-  {
-    month: "July", highlight: null, notes: "",
-    values: {},
-  },
-  {
-    month: "August", highlight: null, notes: "",
-    values: {
-      docsToEdTec: "", acctClose: "w/August (9/22)", staffingModel: "26-Jul",
-      financialReview: "28-Jul", principalMaterials: "", principalMeeting: "-",
-      financeCommitteeMaterials: "3-Aug", finalFinancialReview: "4-Aug",
-      financeCommittee: "", boardMaterials: "6-Aug", boardMeeting: "9-Aug",
-      payrollCheckIn: "", codingCheckIn: "",
-    },
-  },
-  {
-    month: "September", highlight: null, notes: "24-25 Unaudited Actuals",
-    values: {
-      docsToEdTec: "", acctClose: "", staffingModel: "25-Aug",
-      financialReview: "27-Aug", principalMaterials: "28-Aug", principalMeeting: "29-Aug",
-      financeCommitteeMaterials: "2-Sep", finalFinancialReview: "3-Sep",
-      financeCommittee: "4-Sep", boardMaterials: "5-Sep", boardMeeting: "8-Sep",
-      payrollCheckIn: "", codingCheckIn: "",
-    },
-  },
-  {
-    month: "October", highlight: "note", notes: "NO PRESENTATION - internal August financial update",
-    values: {
-      docsToEdTec: "12-Sep", acctClose: "18-Sep", staffingModel: "29-Sep",
-      financialReview: "1-Oct", principalMaterials: "2-Oct", principalMeeting: "3-Oct",
-      financeCommitteeMaterials: "", finalFinancialReview: "8-Oct",
-      financeCommittee: "", boardMaterials: "10-Oct", boardMeeting: "13-Oct",
-      payrollCheckIn: "20-Oct", codingCheckIn: "",
-    },
-  },
-  {
-    month: "November", highlight: "note", notes: "NO PRESENTATION",
-    values: {
-      docsToEdTec: "18-Oct", acctClose: "23-Oct", staffingModel: "27-Oct",
-      financialReview: "29-Oct", principalMaterials: "30-Oct", principalMeeting: "31-Oct",
-      financeCommitteeMaterials: "", finalFinancialReview: "5-Nov",
-      financeCommittee: "", boardMaterials: "7-Nov", boardMeeting: "10-Nov",
-      payrollCheckIn: "", codingCheckIn: "",
-    },
-  },
-  {
-    month: "December", highlight: "row", notes: "24-25 Audit and First Interim (October 2025) Financials",
-    values: {
-      docsToEdTec: "18-Nov", acctClose: "24-Nov", staffingModel: "17-Nov",
-      financialReview: "19-Nov", principalMaterials: "26-Nov", principalMeeting: "1-Dec",
-      financeCommitteeMaterials: "3-Dec", finalFinancialReview: "3-Dec",
-      financeCommittee: "4-Dec", boardMaterials: "5-Dec", boardMeeting: "8-Dec",
-      payrollCheckIn: "-", codingCheckIn: "-",
-    },
-  },
-  {
-    month: "January", highlight: null,
-    notes: "NO PRESENTATION; payroll check in (Sept-Nov) and internal November financials",
-    values: {
-      docsToEdTec: "11-Dec", acctClose: "18-Dec", staffingModel: "15-Dec",
-      financialReview: "17-Dec", principalMaterials: "2-Jan", principalMeeting: "5-Jan",
-      financeCommitteeMaterials: "-", finalFinancialReview: "7-Jan",
-      financeCommittee: "-", boardMaterials: "9-Jan", boardMeeting: "12-Jan",
-      payrollCheckIn: "12-Jan", codingCheckIn: "21-Jan",
-    },
-  },
-  {
-    month: "February", highlight: null, notes: "NO PRESENTATION; internal December financials",
-    values: {
-      docsToEdTec: "4-Jan", acctClose: "9-Jan", staffingModel: "26-Jan",
-      financialReview: "28-Jan", principalMaterials: "29-Jan", principalMeeting: "30-Jan",
-      financeCommitteeMaterials: "", finalFinancialReview: "4-Feb",
-      financeCommittee: "", boardMaterials: "6-Feb", boardMeeting: "9-Feb",
-      payrollCheckIn: "", codingCheckIn: "",
-    },
-  },
-  {
-    month: "March", highlight: "row", notes: "Second Interim (January 2026) Financials",
-    values: {
-      docsToEdTec: "17-Feb", acctClose: "23-Feb", staffingModel: "23-Feb",
-      financialReview: "25-Feb", principalMaterials: "26-Feb", principalMeeting: "27-Feb",
-      financeCommitteeMaterials: "4-Mar", finalFinancialReview: "4-Mar",
-      financeCommittee: "5-Mar", boardMaterials: "6-Mar", boardMeeting: "9-Mar",
-      payrollCheckIn: "-", codingCheckIn: "-",
-    },
-  },
-  {
-    month: "April", highlight: null,
-    notes: "NO BOARD PRESENTATION; payroll check in (Dec-Feb) and internal February financials",
-    values: {
-      docsToEdTec: "13-Mar", acctClose: "19-Mar", staffingModel: "30-Mar",
-      financialReview: "1-Apr", principalMaterials: "2-Apr", principalMeeting: "3-Apr",
-      financeCommitteeMaterials: "", finalFinancialReview: "8-Apr",
-      financeCommittee: "", boardMaterials: "10-Apr", boardMeeting: "13-Apr",
-      payrollCheckIn: "13-Apr", codingCheckIn: "22-Jan",
-    },
-  },
-  {
-    month: "May", highlight: null, notes: "March 2026 Financials, 26-27 Budget Draft",
-    values: {
-      docsToEdTec: "3-Apr", acctClose: "9-Apr", staffingModel: "27-Apr",
-      financialReview: "29-Apr", principalMaterials: "30-Apr", principalMeeting: "1-May",
-      financeCommitteeMaterials: "", finalFinancialReview: "6-May",
-      financeCommittee: "7-May", boardMaterials: "8-May", boardMeeting: "11-May",
-      payrollCheckIn: "-", codingCheckIn: "",
-    },
-  },
-  {
-    month: "June", highlight: "row", notes: "26-27 Budget Approval, April 2026 Financials",
-    values: {
-      docsToEdTec: "15-May", acctClose: "21-May", staffingModel: "1-Jun",
-      financialReview: "3-Jun", principalMaterials: "4-Jun", principalMeeting: "5-Jun",
-      financeCommitteeMaterials: "10-Jun", finalFinancialReview: "10-Jun",
-      financeCommittee: "11-Jun", boardMaterials: "12-Jun", boardMeeting: "15-Jun",
-      payrollCheckIn: "-", codingCheckIn: "-",
-    },
-  },
+const ROLE_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "hr", label: "HR" },
+  { key: "principals", label: "Principals/Site Leads" },
+  { key: "matt", label: "Matt" },
+  { key: "koshaap", label: "Kosha/AP" },
+];
+
+// Row order for the grid — a full school year, July through June.
+const MONTH_ORDER = [
+  "July", "August", "September", "October", "November", "December",
+  "January", "February", "March", "April", "May", "June",
 ];

@@ -291,6 +291,33 @@ body {
   font-size: 0.8rem;
   color: var(--cmp-muted);
 }
+
+/* Role filter toggle */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.filter-btn {
+  border: 1px solid var(--cmp-border);
+  background: var(--cmp-cream);
+  color: var(--cmp-green-dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.filter-btn:hover {
+  background: var(--cmp-border);
+}
+.filter-btn.active {
+  background: var(--cmp-green);
+  border-color: var(--cmp-green);
+  color: #fff;
+}
+
 .table-scroll {
   overflow-x: auto;
   border: 1px solid var(--cmp-border);
@@ -299,20 +326,32 @@ body {
 .grid-table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 1400px;
-  font-size: 0.78rem;
+  table-layout: fixed;
+  min-width: 1100px;
+  font-size: 0.76rem;
 }
 .grid-table th,
 .grid-table td {
   border: 1px solid var(--cmp-border);
-  padding: 6px 8px;
+  padding: 6px 6px;
   text-align: left;
-  white-space: nowrap;
+  vertical-align: top;
+  width: 74px;
+}
+.grid-table th.corner,
+.grid-table td.month-cell {
+  width: 92px;
+}
+.grid-table th:last-child,
+.grid-table td:last-child {
+  width: 200px;
 }
 .grid-table thead th {
   background: var(--cmp-green);
   color: #fff;
   font-weight: 600;
+  white-space: normal;
+  line-height: 1.25;
   position: sticky;
   top: 0;
 }
@@ -320,7 +359,7 @@ body {
 .grid-table thead tr:nth-child(3) th {
   background: var(--cmp-green-dark);
   font-weight: 500;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: #dcebe3;
 }
 .grid-table thead th.corner {
@@ -332,22 +371,35 @@ body {
   background: var(--cmp-cream);
   position: sticky;
   left: 0;
-}
-.grid-table tr.row-highlight td {
-  background: #FCEEB5;
-}
-.grid-table tr.row-highlight td.month-cell {
-  background: #F6DE84;
-}
-.grid-table td.note-highlight {
-  background: #FCEEB5;
-  white-space: normal;
-  min-width: 220px;
+  white-space: nowrap;
 }
 .grid-table td:last-child {
   white-space: normal;
-  min-width: 220px;
 }
+
+/* Weekend / holiday markers */
+.mk {
+  font-size: 0.85em;
+  cursor: help;
+}
+.mk-wknd { color: var(--cmp-gold); }
+.mk-holiday { color: #8E5A9E; }
+
+/* Role filter: hide columns not tagged for the active role */
+.table-scroll.filter-active .col-none,
+.table-scroll.filter-active .col-hr,
+.table-scroll.filter-active .col-principals,
+.table-scroll.filter-active .col-matt,
+.table-scroll.filter-active .col-koshaap {
+  display: none;
+}
+.table-scroll.filter-hr .col-hr,
+.table-scroll.filter-principals .col-principals,
+.table-scroll.filter-matt .col-matt,
+.table-scroll.filter-koshaap .col-koshaap {
+  display: table-cell;
+}
+
 .table-footnote {
   margin: 12px 2px 0;
   font-size: 0.82rem;

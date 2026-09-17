@@ -376,6 +376,9 @@ body {
 .grid-table td:last-child {
   white-space: normal;
 }
+.grid-table td:not(.month-cell):not(:last-child) {
+  text-align: center;
+}
 
 /* Weekend / holiday markers */
 .mk {

@@ -44,6 +44,18 @@
       </div>
 
       <p class="table-footnote" id="tableFootnote"></p>
+
+      <div class="save-bar">
+        <button type="button" id="saveChangesBtn" class="save-btn">Save Changes</button>
+        <span id="saveHint" class="save-hint"></span>
+      </div>
+      <div id="saveOutput" class="save-output" hidden>
+        <p class="save-instructions">Copy the code below and paste it into <code>table-data.js</code>, replacing the existing <code>OVERRIDES</code> and <code>NOTES_OVERRIDES</code> blocks near the bottom of the file. Then commit &amp; push as usual.</p>
+        <div class="save-code-wrap">
+          <button type="button" id="copyCodeBtn" class="copy-btn">Copy</button>
+          <pre id="saveCode" class="save-code"></pre>
+        </div>
+      </div>
     </section>
   </main>
 

@@ -1,8 +1,8 @@
 /**
  * Builds the grid from computeCycles() (schedule.js), buckets everything
  * into month rows, and renders the table — including the weekend/holiday
- * markers, due-soon highlighting, and the role filter. No date math lives
- * here; see schedule.js.
+ * markers, the role filter, the editable cells, and the Save Changes
+ * code generator. No date math lives here; see schedule.js.
  */
 (function () {
   const { boardCycles, fcCycles, acctCycles } = computeCycles();
@@ -21,19 +21,28 @@
   function urgencyClass(date) {
     const days = daysUntil(date);
     if (days < 0) return "";
-    if (days <= 5) return "due-soon due-orange";
-    if (days <= 10) return "due-soon due-yellow";
+    if (days <= 5) return "due-orange";
+    if (days <= 10) return "due-yellow";
     return "";
   }
 
-  // Renders one date as an HTML snippet with * / † markers + tooltips.
+  function markersFor(d) {
+    const marks = [];
+    if (d.adjusted) marks.push(`<sup class="mk mk-wknd" title="Moved from a weekend to this Friday">*</sup>`);
+    const holiday = d.date ? holidayFor(d.date) : null;
+    if (holiday) marks.push(`<sup class="mk mk-holiday" title="${holiday.label}">&dagger;</sup>`);
+    if (d.tentative) marks.push(`<sup class="mk mk-tentative" title="Tentative — subject to change">&Dagger;</sup>`);
+    return marks.join("");
+  }
+
+  // Renders one date as read-only HTML (Board Meeting, Finance Committee).
   function renderDate(date, adjusted) {
     const holiday = holidayFor(date);
     let html = formatShort(date);
     if (adjusted) html += `<sup class="mk mk-wknd" title="Moved from a weekend to this Friday">*</sup>`;
-    if (holiday) html += `<sup class="mk mk-holiday" title="${holiday}">&dagger;</sup>`;
+    if (holiday) html += `<sup class="mk mk-holiday" title="${holiday.label}">&dagger;</sup>`;
     const cls = urgencyClass(date);
-    return cls ? `<span class="${cls}">${html}</span>` : html;
+    return cls ? `<span class="due-soon ${cls}">${html}</span>` : html;
   }
 
   function renderCell(dates) {
@@ -41,11 +50,39 @@
     return dates.map((d) => renderDate(d.date, d.adjusted)).join("<br>");
   }
 
+  // Renders one date as an editable <input type="date"> plus its markers.
+  function renderEditableCell(dates) {
+    if (!dates || dates.length === 0) return "";
+    return dates
+      .map((d) => {
+        const cls = d.date ? urgencyClass(d.date) : "";
+        const iso = d.date ? toISO(d.date) : "";
+        const marks = markersFor(d);
+        const inputClasses = ["cell-input"];
+        if (cls) inputClasses.push(cls);
+        if (d.overridden) inputClasses.push("cell-overridden");
+        return `<div class="cell-edit">
+          <input type="date" class="${inputClasses.join(" ")}" data-col="${d.col}" data-anchor="${d.anchorISO}" data-default="${d.naturalISO}" value="${iso}">
+          ${marks ? `<span class="cell-marks">${marks}</span>` : ""}
+        </div>`;
+      })
+      .join("");
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  }
+
+  function renderNotesCell(month) {
+    const val = (typeof NOTES_OVERRIDES !== "undefined" && NOTES_OVERRIDES[month]) || "";
+    return `<input type="text" class="cell-input notes-input" data-month="${month}" value="${esc(val)}" placeholder="Add a note...">`;
+  }
+
   // ---- Build per-month buckets ----
   const rows = {};
   MONTH_ORDER.forEach((m) => {
     rows[m] = {
-      docsToVertex: [], acctClose: [], staffingModel: [], financialReview: [],
+      docsToVertex: [], acctClose: [], staffingModel: [], spedSheetUpdatesDue: [], financialReview: [],
       principalMaterials: [], principalMeeting: [], financeCommitteeMaterials: [],
       finalFinancialReview: [], financeCommittee: [], boardMaterials: [],
       boardMeeting: [], payrollCheckIn: [], codingCheckIn: [],
@@ -59,6 +96,11 @@
     bucket.finalFinancialReview.push(c.finalFinancialReview);
     bucket.financialReview.push(c.financialReview);
     bucket.staffingModel.push(c.staffingModel);
+    bucket.spedSheetUpdatesDue.push(c.spedSheetUpdatesDue);
+    bucket.principalMeeting.push(c.principalMeeting);
+    bucket.principalMaterials.push(c.principalMaterials);
+    bucket.payrollCheckIn.push(c.payrollCheckIn);
+    bucket.codingCheckIn.push(c.codingCheckIn);
   });
 
   fcCycles.forEach((c) => {
@@ -114,9 +156,10 @@
     let cells = `<td class="month-cell">${month}</td>`;
     TABLE_COLUMNS.forEach((col) => {
       const cls = roleClass(col.role);
-      cells += `<td class="${cls}">${renderCell(r[col.key])}</td>`;
+      const content = EDITABLE_COLUMNS.has(col.key) ? renderEditableCell(r[col.key]) : renderCell(r[col.key]);
+      cells += `<td class="${cls}">${content}</td>`;
     });
-    cells += `<td></td>`; // Notes column — left for you to fill in
+    cells += `<td>${renderNotesCell(month)}</td>`;
     bodyHtml += `<tr>${cells}</tr>`;
   });
   tbody.innerHTML = bodyHtml;
@@ -138,4 +181,74 @@
       tableScroll.classList.add("filter-active", "filter-" + key);
     }
   });
+
+  // ---- Save Changes: generate an updated OVERRIDES / NOTES_OVERRIDES block ----
+  const saveBtn = document.getElementById("saveChangesBtn");
+  const saveOutput = document.getElementById("saveOutput");
+  const saveCode = document.getElementById("saveCode");
+  const copyBtn = document.getElementById("copyCodeBtn");
+  const saveHint = document.getElementById("saveHint");
+
+  function collectOverrides() {
+    const overrides = {};
+    tbody.querySelectorAll(".cell-input[data-col]").forEach((input) => {
+      const col = input.dataset.col;
+      const anchor = input.dataset.anchor;
+      const val = input.value;
+      const def = input.dataset.default;
+      if (val && val !== def) {
+        overrides[col] = overrides[col] || {};
+        overrides[col][anchor] = val;
+      }
+    });
+    const notes = {};
+    tbody.querySelectorAll(".notes-input").forEach((input) => {
+      const month = input.dataset.month;
+      const val = input.value.trim();
+      if (val) notes[month] = val;
+    });
+    return { overrides, notes };
+  }
+
+  function serialize(overrides, notes) {
+    const lines = ["const OVERRIDES = {"];
+    Object.keys(overrides).sort().forEach((col) => {
+      lines.push(`  ${col}: {`);
+      Object.keys(overrides[col]).sort().forEach((anchor) => {
+        lines.push(`    "${anchor}": "${overrides[col][anchor]}",`);
+      });
+      lines.push("  },");
+    });
+    lines.push("};");
+    lines.push("");
+    lines.push("const NOTES_OVERRIDES = {");
+    Object.keys(notes).forEach((month) => {
+      lines.push(`  "${month}": ${JSON.stringify(notes[month])},`);
+    });
+    lines.push("};");
+    return lines.join("\n");
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      const { overrides, notes } = collectOverrides();
+      saveCode.textContent = serialize(overrides, notes);
+      saveOutput.hidden = false;
+      saveHint.textContent = "";
+      saveOutput.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      const text = saveCode.textContent;
+      const done = () => { saveHint.textContent = "Copied!"; };
+      const fail = () => { saveHint.textContent = "Couldn't copy automatically — select the text above and copy it manually."; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(fail);
+      } else {
+        fail();
+      }
+    });
+  }
 })();

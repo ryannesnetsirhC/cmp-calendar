@@ -409,26 +409,27 @@ body {
   text-align: center;
 }
 
-/* Weekend / holiday markers */
+/* Weekend / holiday / tentative markers */
 .mk {
   font-size: 0.85em;
   cursor: help;
 }
 .mk-wknd { color: var(--cmp-gold); }
 .mk-holiday { color: #8E5A9E; }
+.mk-tentative { color: #B03A3A; }
 
-/* Due-soon highlighting (Table View) */
+/* Due-soon highlighting (Table View, read-only cells) */
 .due-soon {
   display: inline-block;
   padding: 1px 6px;
   border-radius: 4px;
   font-weight: 700;
 }
-.due-yellow {
+.due-soon.due-yellow {
   background: #FDE68A;
   color: #7A5B00;
 }
-.due-orange {
+.due-soon.due-orange {
   background: #FDBA74;
   color: #7A3300;
 }
@@ -438,13 +439,15 @@ body {
 .table-scroll.filter-active .col-hr,
 .table-scroll.filter-active .col-principals,
 .table-scroll.filter-active .col-matt,
-.table-scroll.filter-active .col-koshaap {
+.table-scroll.filter-active .col-koshaap,
+.table-scroll.filter-active .col-sped {
   display: none;
 }
 .table-scroll.filter-hr .col-hr,
 .table-scroll.filter-principals .col-principals,
 .table-scroll.filter-matt .col-matt,
-.table-scroll.filter-koshaap .col-koshaap {
+.table-scroll.filter-koshaap .col-koshaap,
+.table-scroll.filter-sped .col-sped {
   display: table-cell;
 }
 
@@ -452,6 +455,101 @@ body {
   margin: 12px 2px 0;
   font-size: 0.82rem;
   color: var(--cmp-muted);
+}
+
+/* ---------- Editable cells (Table View) ---------- */
+.cell-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin: 1px 0;
+}
+.cell-input {
+  font: inherit;
+  font-size: 0.72rem;
+  border: 1px solid var(--cmp-border);
+  border-radius: 4px;
+  padding: 2px 3px;
+  background: #fff;
+  color: var(--cmp-ink);
+  width: 100%;
+  max-width: 122px;
+}
+.cell-input.due-orange { background: #FDBA74; }
+.cell-input.due-yellow { background: #FDE68A; }
+.cell-input.cell-overridden {
+  border-color: var(--cmp-gold);
+  border-width: 2px;
+}
+.cell-input.notes-input {
+  max-width: none;
+  text-align: left;
+}
+.cell-marks {
+  display: inline-flex;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+/* ---------- Save Changes ---------- */
+.save-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.save-btn {
+  background: var(--cmp-green);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.save-btn:hover { background: var(--cmp-green-dark); }
+.save-hint {
+  font-size: 0.82rem;
+  color: var(--cmp-muted);
+}
+.save-output {
+  margin-top: 14px;
+  border: 1px solid var(--cmp-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--cmp-cream);
+}
+.save-instructions {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--cmp-ink);
+}
+.save-code-wrap {
+  position: relative;
+}
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 1px solid var(--cmp-border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.copy-btn:hover { background: var(--cmp-border); }
+.save-code {
+  margin: 0;
+  padding: 14px;
+  background: var(--cmp-ink);
+  color: #d9f0e3;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  overflow-x: auto;
+  white-space: pre;
 }
 
 /* ---------- Footer ---------- */

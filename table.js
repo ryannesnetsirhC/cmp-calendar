@@ -5,7 +5,7 @@
  * here; see schedule.js.
  */
 (function () {
-  const { boardCycles, fcCycles, acctCycles, staffingModel } = computeCycles();
+  const { boardCycles, fcCycles, acctCycles } = computeCycles();
 
   // ---- Due-soon highlighting ----
   // Compares each date to today (whenever the page happens to be opened) —
@@ -58,6 +58,7 @@
     bucket.boardMaterials.push(c.boardMaterials);
     bucket.finalFinancialReview.push(c.finalFinancialReview);
     bucket.financialReview.push(c.financialReview);
+    bucket.staffingModel.push(c.staffingModel);
   });
 
   fcCycles.forEach((c) => {
@@ -70,10 +71,6 @@
     const bucket = rows[monthNameOf(c.acctClose.date)];
     bucket.acctClose.push(c.acctClose);
     bucket.docsToVertex.push(c.docsToVertex);
-  });
-
-  staffingModel.forEach((s) => {
-    rows[monthNameOf(s.date)].staffingModel.push(s);
   });
 
   // ---- Render header ----

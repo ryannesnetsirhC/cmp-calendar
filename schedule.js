@@ -51,6 +51,15 @@ function holidayFor(date) {
   return HOLIDAYS[toISO(date)] || null;
 }
 
+// Two board cycles' Staffing Model Updates Due would land during a full
+// week school is out (Thanksgiving, Christmas) — hardcoded here to the
+// Tuesday after school is back instead of the usual formula. Keyed by
+// that cycle's Board Meeting date (from ANCHORS.boardMeetings).
+const STAFFING_MODEL_HARDCODED = {
+  "2026-12-14": "2026-12-01", // Thanksgiving week off; Tue after back (Mon 11/30)
+  "2027-01-11": "2027-01-05", // Christmas week off; Tue after back (Mon 1/4)
+};
+
 // Computes every cycle from the ANCHORS in table-data.js.
 function computeCycles() {
   const boardCycles = ANCHORS.boardMeetings.map((iso) => {
@@ -61,11 +70,18 @@ function computeCycles() {
     const finalReview = rollToFriday(rawFinalReview);
     const rawFinancialReview = addDays(rawFinalReview, -7);
     const financialReview = rollToFriday(rawFinancialReview);
+    // Staffing Model Updates Due = Financial Review date minus 3 days
+    // (often lands on a Sunday, which then rolls back to Friday) — unless
+    // this cycle is hardcoded above.
+    const hardcoded = STAFFING_MODEL_HARDCODED[iso];
+    const rawStaffingModel = hardcoded ? parseISO(hardcoded) : addDays(financialReview.date, -3);
+    const staffingModel = rollToFriday(rawStaffingModel);
     return {
       boardMeeting: { date: meeting, adjusted: false },
       boardMaterials: materials,
       finalFinancialReview: finalReview,
       financialReview: financialReview,
+      staffingModel: staffingModel,
     };
   });
 
@@ -87,18 +103,13 @@ function computeCycles() {
     };
   });
 
-  const staffingModel = ANCHORS.staffingModel.map((iso) => ({
-    date: parseISO(iso),
-    adjusted: false,
-  }));
-
-  return { boardCycles, fcCycles, acctCycles, staffingModel };
+  return { boardCycles, fcCycles, acctCycles };
 }
 
 // Flattens computeCycles() into a Calendar-ready EVENTS array
 // ({date, title, category, note}) — used by events.js.
 function buildCalendarEvents() {
-  const { boardCycles, fcCycles, acctCycles, staffingModel } = computeCycles();
+  const { boardCycles, fcCycles, acctCycles } = computeCycles();
   const events = [];
 
   function push(item, title, category) {
@@ -124,6 +135,7 @@ function buildCalendarEvents() {
     push(c.boardMaterials, "Board Materials Ready", "boardMaterials");
     push(c.finalFinancialReview, "Final Financial Review", "finalFinancialReview");
     push(c.financialReview, "Financial Review", "financialReview");
+    push(c.staffingModel, "Staffing Model Updates Due", "staffingModel");
   });
   fcCycles.forEach((c) => {
     push(c.financeCommittee, "Finance Committee", "financeCommittee");
@@ -132,9 +144,6 @@ function buildCalendarEvents() {
   acctCycles.forEach((c) => {
     push(c.acctClose, "Accounting Close", "acctClose");
     push(c.docsToVertex, "Documents Due to Vertex", "docsToVertex");
-  });
-  staffingModel.forEach((s) => {
-    push(s, "Staffing Model Updates Due", "staffingModel");
   });
 
   return events;

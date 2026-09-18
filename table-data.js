@@ -3,17 +3,25 @@
  * --------------------------------------
  * This file holds only the real "anchor" dates you gave us. Everything
  * else (Board Materials Ready, Final Financial Review, FC Materials
- * Ready, Documents Due to Vertex) is CALCULATED from these anchors by
- * table.js using the rules you specified:
+ * Ready, Documents Due to Vertex, Financial Review, Staffing Model
+ * Updates Due) is CALCULATED from these anchors by schedule.js using
+ * the rules you specified:
  *   - Board Materials Ready  = Board Meeting date  minus 3 days
  *   - Final Financial Review = Board Materials Ready minus 2 days
+ *   - Financial Review = Final Financial Review date minus 7 days
+ *   - Staffing Model Updates Due = Financial Review date minus 3 days
  *   - FC Materials Ready     = Finance Committee date minus 1 day
  *   - Documents Due to Vertex = Accounting Close date minus 6 days
- *   - Financial Review = Final Financial Review date minus 7 days
  * If a calculated date lands on a Saturday or Sunday, it's automatically
  * rolled back to the preceding Friday (marked with * in the table).
  * If a calculated OR given date lands on a known school holiday, it's
  * marked with † (shown, not moved).
+ *
+ * Two exceptions: the Dec 14 and Jan 11 board cycles' Staffing Model
+ * Updates Due would otherwise land during Thanksgiving/Christmas break,
+ * so those two are hardcoded (in schedule.js) to the Tuesday after
+ * school is back instead of calculated. Everything else here still
+ * flows through the formulas above.
  *
  * TO UPDATE: add/edit dates in the arrays below ("YYYY-MM-DD").
  * Nothing else in this file needs to change.
@@ -37,10 +45,6 @@ const ANCHORS = {
     "2026-08-24", "2026-09-18", "2026-10-12", "2026-11-13",
     // Add Dec 2026 – Jun 2027 accounting close dates here once you have them.
   ],
-  staffingModel: [
-    "2026-09-15", "2026-10-12",
-    // Add more Staffing Model Updates Due dates here once you have them.
-  ],
 };
 
 // Common school-calendar holidays for this range — used only to flag
@@ -62,7 +66,7 @@ const HOLIDAYS = {
 const TABLE_META = {
   title: "2026-27 CMP Monthly Financial Calendar",
   updated: "",
-        footnote: "Board Meetings: 9am–12pm  •  * = moved from a weekend to the prior Friday   † = falls on a school holiday  •  🟧 due within 5 days   🟨 due within 10 days",
+  footnote: "Board Meetings: 9am–12pm  •  * = moved from a weekend to the prior Friday   † = falls on a school holiday  •  🟧 due within 5 days   🟨 due within 10 days",
 };
 
 // Column order, left to right. "role" tags which position-type filter
@@ -70,7 +74,7 @@ const TABLE_META = {
 const TABLE_COLUMNS = [
   { key: "docsToVertex", label: "Documents due to Vertex", owner: "Kosha/AP, SpEd", cadence: "6 Days Prior", role: "koshaap" },
   { key: "acctClose", label: "Accounting Close", owner: "EdTec", cadence: "Varies", role: null },
-  { key: "staffingModel", label: "Staffing Model Updates Due", owner: "HR", cadence: "", role: "hr" },
+  { key: "staffingModel", label: "Staffing Model Updates Due", owner: "HR", cadence: "3 Days Prior", role: "hr" },
   { key: "financialReview", label: "Financial Review", owner: "Varies", cadence: "Wednesday", role: null },
   { key: "principalMaterials", label: "Principal Materials Ready", owner: "EdTec", cadence: "Thursday", role: "principals" },
   { key: "principalMeeting", label: "Principal Meeting", owner: "EdTec, Principals", cadence: "Friday", role: "principals" },

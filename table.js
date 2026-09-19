@@ -50,23 +50,64 @@
     return dates.map((d) => renderDate(d.date, d.adjusted)).join("<br>");
   }
 
-  // Renders one date as an editable <input type="date"> plus its markers.
+  // Editable cells render as plain clicked-to-look-like-text spans (same
+  // look as the read-only columns) with a hidden <input type="date">
+  // right behind them. Click the text to reveal the date picker; it
+  // commits back to text on blur/change. Save Changes reads every
+  // .cell-input directly, so this is purely a display-layer trick — the
+  // underlying values and override logic are unchanged.
+  function displaySpanHtml(d) {
+    if (!d.date) return `<span class="cell-display cell-empty" tabindex="0">+ Add</span>`;
+    const cls = urgencyClass(d.date);
+    const marks = markersFor(d);
+    const spanClasses = ["cell-display"];
+    if (cls) spanClasses.push(cls);
+    if (d.overridden) spanClasses.push("cell-overridden-text");
+    return `<span class="${spanClasses.join(" ")}" tabindex="0">${formatShort(d.date)}${marks}</span>`;
+  }
+
+  // Renders one date as a click-to-edit cell (text by default, an
+  // <input type="date"> underneath it).
   function renderEditableCell(dates) {
     if (!dates || dates.length === 0) return "";
     return dates
       .map((d) => {
-        const cls = d.date ? urgencyClass(d.date) : "";
         const iso = d.date ? toISO(d.date) : "";
-        const marks = markersFor(d);
-        const inputClasses = ["cell-input"];
-        if (cls) inputClasses.push(cls);
-        if (d.overridden) inputClasses.push("cell-overridden");
         return `<div class="cell-edit">
-          <input type="date" class="${inputClasses.join(" ")}" data-col="${d.col}" data-anchor="${d.anchorISO}" data-default="${d.naturalISO}" value="${iso}">
-          ${marks ? `<span class="cell-marks">${marks}</span>` : ""}
+          ${displaySpanHtml(d)}
+          <input type="date" class="cell-input" data-col="${d.col}" data-anchor="${d.anchorISO}" data-default="${d.naturalISO}" value="${iso}" hidden>
         </div>`;
       })
       .join("");
+  }
+
+  // Recomputes a cell's display span after its input value changes.
+  // Manual edits are never auto-rolled off a weekend and are never
+  // treated as "tentative" (editing it is how you resolve tentative) —
+  // but still get a holiday/weekend heads-up and the overridden style.
+  function refreshDisplay(input) {
+    const wrap = input.closest(".cell-edit");
+    const span = wrap.querySelector(".cell-display");
+    const iso = input.value;
+    const def = input.dataset.default;
+    if (!iso) {
+      span.className = "cell-display cell-empty";
+      span.textContent = "+ Add";
+      return;
+    }
+    const date = parseISO(iso);
+    let html = formatShort(date);
+    const holiday = holidayFor(date);
+    if (holiday) html += `<sup class="mk mk-holiday" title="${holiday.label}">&dagger;</sup>`;
+    const day = date.getDay();
+    if (day === 0 || day === 6) html += `<sup class="mk mk-wknd" title="Falls on a weekend">*</sup>`;
+    const cls = urgencyClass(date);
+    const overridden = iso !== def;
+    const spanClasses = ["cell-display"];
+    if (cls) spanClasses.push(cls);
+    if (overridden) spanClasses.push("cell-overridden-text");
+    span.className = spanClasses.join(" ");
+    span.innerHTML = html;
   }
 
   function esc(s) {
@@ -181,6 +222,55 @@
       tableScroll.classList.add("filter-active", "filter-" + key);
     }
   });
+
+  // ---- Click-to-edit wiring ----
+  function openEditor(span) {
+    const wrap = span.closest(".cell-edit");
+    const input = wrap && wrap.querySelector(".cell-input");
+    if (!input) return;
+    span.hidden = true;
+    input.hidden = false;
+    input.focus();
+    if (input.showPicker) {
+      try { input.showPicker(); } catch (err) { /* not user-activated / unsupported */ }
+    }
+  }
+
+  function closeEditor(input) {
+    refreshDisplay(input);
+    const wrap = input.closest(".cell-edit");
+    const span = wrap && wrap.querySelector(".cell-display");
+    input.hidden = true;
+    if (span) span.hidden = false;
+  }
+
+  tbody.addEventListener("click", (e) => {
+    const span = e.target.closest(".cell-display");
+    if (span) openEditor(span);
+  });
+
+  tbody.addEventListener("keydown", (e) => {
+    const span = e.target.closest(".cell-display");
+    if (span && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      openEditor(span);
+    }
+  });
+
+  tbody.addEventListener("change", (e) => {
+    if (e.target.matches(".cell-input[data-col]")) closeEditor(e.target);
+  });
+
+  // blur doesn't bubble, so this listener uses the capture phase.
+  tbody.addEventListener(
+    "blur",
+    (e) => {
+      if (e.target.matches && e.target.matches(".cell-input[data-col]") && !e.target.hidden) {
+        closeEditor(e.target);
+      }
+    },
+    true
+  );
 
   // ---- Save Changes: generate an updated OVERRIDES / NOTES_OVERRIDES block ----
   const saveBtn = document.getElementById("saveChangesBtn");

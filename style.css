@@ -458,31 +458,60 @@ body {
 }
 
 /* ---------- Editable cells (Table View) ---------- */
+/* Click-to-edit: a plain-text span by default (matches the read-only
+   columns) with a hidden date input behind it; clicking the span swaps
+   them. Keeps the grid looking like a normal spreadsheet instead of a
+   wall of input boxes. */
 .cell-edit {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  margin: 1px 0;
+  margin: 2px 0;
+}
+.cell-display {
+  display: inline-block;
+  cursor: pointer;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border-bottom: 1px dashed var(--cmp-border);
+}
+.cell-display:hover,
+.cell-display:focus {
+  background: var(--cmp-border);
+  outline: none;
+}
+.cell-display.due-orange {
+  background: #FDBA74;
+  color: #7A3300;
+  border-bottom-color: transparent;
+  font-weight: 700;
+}
+.cell-display.due-yellow {
+  background: #FDE68A;
+  color: #7A5B00;
+  border-bottom-color: transparent;
+  font-weight: 700;
+}
+.cell-display.cell-empty {
+  color: var(--cmp-muted);
+  font-style: italic;
+  font-size: 0.72rem;
+  border-bottom-color: var(--cmp-border);
+}
+.cell-display.cell-overridden-text {
+  font-weight: 700;
+  color: var(--cmp-green-dark);
 }
 .cell-input {
   font: inherit;
   font-size: 0.72rem;
-  border: 1px solid var(--cmp-border);
+  border: 1px solid var(--cmp-gold);
   border-radius: 4px;
   padding: 2px 3px;
   background: #fff;
   color: var(--cmp-ink);
   width: 100%;
-  max-width: 122px;
-}
-.cell-input.due-orange { background: #FDBA74; }
-.cell-input.due-yellow { background: #FDE68A; }
-.cell-input.cell-overridden {
-  border-color: var(--cmp-gold);
-  border-width: 2px;
+  max-width: 130px;
 }
 .cell-input.notes-input {
+  border-color: var(--cmp-border);
   max-width: none;
   text-align: left;
 }

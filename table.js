@@ -170,7 +170,6 @@
 
   const theadLabels = document.getElementById("theadLabels");
   const theadOwners = document.getElementById("theadOwners");
-  const theadCadence = document.getElementById("theadCadence");
   const tbody = document.getElementById("tbody");
   const filterBar = document.getElementById("filterBar");
   const tableScroll = document.getElementById("tableScroll");
@@ -181,21 +180,17 @@
 
   let labelsHtml = `<th class="corner">Activity</th>`;
   let ownersHtml = `<th class="corner">Owner/Participants</th>`;
-  let cadenceHtml = `<th class="corner">Month/Day</th>`;
 
   TABLE_COLUMNS.forEach((col) => {
     const cls = roleClass(col.role);
     labelsHtml += `<th class="${cls}">${col.label}</th>`;
     ownersHtml += `<th class="${cls}">${col.owner || ""}</th>`;
-    cadenceHtml += `<th class="${cls}">${col.cadence || ""}</th>`;
   });
   labelsHtml += `<th>Notes</th>`;
   ownersHtml += `<th></th>`;
-  cadenceHtml += `<th></th>`;
 
   theadLabels.innerHTML = labelsHtml;
   theadOwners.innerHTML = ownersHtml;
-  theadCadence.innerHTML = cadenceHtml;
 
   // The 3 header rows stack (sticky) in whatever order they appear in
   // table.html. Row heights vary with text wrapping, so each row's
@@ -210,27 +205,21 @@
   }
   applyStickyHeaderOffsets();
 
-  // A month row is "past" once every date it holds is behind today —
-  // rows with no dates at all (nothing scheduled that month) don't count.
-  function isRowFullyPast(r) {
-    let hasAny = false;
-    let allPast = true;
-    Object.keys(r).forEach((key) => {
-      r[key].forEach((d) => {
-        if (d && d.date) {
-          hasAny = true;
-          if (daysUntil(d.date) >= 0) allPast = false;
-        }
-      });
-    });
-    return hasAny && allPast;
+  // A month row grays out once that whole calendar month is behind
+  // today — not just once its scheduled items are (a month with
+  // nothing in it, like July after summer's over, should still gray).
+  function isMonthFullyPast(monthIndexInOrder) {
+    const info = MONTH_ORDER_INFO[monthIndexInOrder];
+    const lastDay = new Date(info.year, info.monthIndex + 1, 0); // day 0 of next month
+    const t = new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+    return lastDay < t;
   }
 
   // ---- Render body ----
   let bodyHtml = "";
-  MONTH_ORDER.forEach((month) => {
+  MONTH_ORDER.forEach((month, i) => {
     const r = rows[month];
-    const rowCls = isRowFullyPast(r) ? " class=\"row-past\"" : "";
+    const rowCls = isMonthFullyPast(i) ? " class=\"row-past\"" : "";
     let cells = `<td class="month-cell">${month}</td>`;
     TABLE_COLUMNS.forEach((col) => {
       const cls = roleClass(col.role);
@@ -273,28 +262,12 @@
     }
   }
 
-  // Re-checks a row's "fully past" status from its inputs' live values
-  // (used after an edit — the initial render uses isRowFullyPast above).
-  function refreshRowPastState(tr) {
-    let hasAny = false;
-    let allPast = true;
-    tr.querySelectorAll(".cell-input[data-col]").forEach((input) => {
-      if (input.value) {
-        hasAny = true;
-        if (daysUntil(parseISO(input.value)) >= 0) allPast = false;
-      }
-    });
-    tr.classList.toggle("row-past", hasAny && allPast);
-  }
-
   function closeEditor(input) {
     refreshDisplay(input);
     const wrap = input.closest(".cell-edit");
     const span = wrap && wrap.querySelector(".cell-display");
     input.hidden = true;
     if (span) span.hidden = false;
-    const tr = input.closest("tr");
-    if (tr) refreshRowPastState(tr);
   }
 
   tbody.addEventListener("click", (e) => {

@@ -390,8 +390,7 @@ body {
   top: var(--sticky-top, 0px);
   z-index: 2;
 }
-.grid-table thead tr:nth-child(2) th,
-.grid-table thead tr:nth-child(3) th {
+.grid-table thead tr:nth-child(2) th {
   background: var(--cmp-green-dark);
   font-weight: 500;
   font-size: 0.7rem;

@@ -61,18 +61,37 @@ function subtractBusinessDays(date, n) {
   return d;
 }
 
-// The Friday strictly BEFORE the given date. If the date is itself a
-// Friday, this steps back a full week (used for Principal Meeting).
-function fridayBefore(date) {
+// The most recent given-weekday date STRICTLY before `date` (0=Sun..
+// 6=Sat) — if `date` itself falls on that weekday, steps back a full
+// week rather than returning the same day.
+function weekdayBefore(date, targetDay) {
   const day = date.getDay();
-  const diff = (day - 5 + 7) % 7;
+  const diff = (day - targetDay + 7) % 7;
   const offset = diff === 0 ? 7 : diff;
   return addDays(date, -offset);
 }
 
-// The Thursday on/before the given date (returns the date itself if it
-// is already a Thursday). Used for Final Financial Review, which is
-// always a Thursday and therefore never needs a weekend roll.
+// The Friday strictly BEFORE the given date (used for Principal Meeting).
+function fridayBefore(date) {
+  return weekdayBefore(date, 5);
+}
+
+// The Tuesday strictly before the given date (used for Final Financial
+// Review in a board cycle paired with a Finance Committee meeting).
+function tuesdayBefore(date) {
+  return weekdayBefore(date, 2);
+}
+
+// The Thursday strictly before the given date (used for Financial
+// Review in a paired cycle — see tuesdayBefore).
+function thursdayBefore(date) {
+  return weekdayBefore(date, 4);
+}
+
+// The Thursday ON OR BEFORE the given date (returns the date itself if
+// it is already a Thursday). Used for Final Financial Review in an
+// UNPAIRED cycle, which is always a Thursday and therefore never needs
+// a weekend roll.
 function thursdayOnOrBefore(date) {
   const day = date.getDay();
   const diff = (day - 4 + 7) % 7;
@@ -83,12 +102,17 @@ function holidayFor(date) {
   return HOLIDAYS[toISO(date)] || null;
 }
 
-// Two board cycles' Staffing Model Updates Due would land during a full
-// week school is out (Thanksgiving, Christmas) — hardcoded here to the
-// Tuesday after school is back instead of the usual formula. Keyed by
-// that cycle's Board Meeting date (from ANCHORS.boardMeetings).
+// The Jan 11 board cycle's Staffing Model Updates Due would otherwise
+// land during Christmas/Winter Break (Dec 27-30 is a Network Closure) —
+// hardcoded here to the Tuesday after school is back instead of the
+// usual formula. Keyed by that cycle's Board Meeting date (from
+// ANCHORS.boardMeetings).
+//
+// Note: the Dec 14 cycle used to need one of these too, but since Final
+// Financial Review became Thursday-anchored, its Staffing Model now
+// naturally lands on Mon 11/30 — a normal school day, no override
+// needed — so that entry was removed.
 const STAFFING_MODEL_HARDCODED = {
-  "2026-12-14": "2026-12-01", // Thanksgiving week off; Tue after back (Mon 11/30)
   "2027-01-11": "2027-01-05", // Christmas week off; Tue after back (Mon 1/4)
 };
 
@@ -132,14 +156,39 @@ function computeCycles() {
     const rawMaterials = addDays(meeting, -3);
     const materials = applyOverride("boardMaterials", iso, rollToFriday(rawMaterials));
 
-    // Final Financial Review is always a Thursday: the Thursday on/before
-    // Board Materials Ready. Financial Review is always the Thursday 7
-    // days before THAT. Both are guaranteed weekdays, so neither ever
-    // needs a weekend roll.
-    const finalReviewDate = thursdayOnOrBefore(materials.date);
-    const finalReview = applyOverride("finalFinancialReview", iso, { date: finalReviewDate, adjusted: false });
+    // A board meeting "paired" with a Finance Committee meeting (an FC
+    // date in the same calendar month, before the board meeting) needs
+    // its reviews done and vetted BEFORE FC meets — FC reviews the
+    // numbers ahead of them going to the full board. So for a paired
+    // cycle, Financial Review and Final Financial Review are anchored
+    // off the FC date instead of off Board Materials Ready:
+    //   Financial Review       = the Thursday strictly before FC
+    //   Final Financial Review = the Tuesday strictly before FC
+    // (never the same day as FC, even if FC itself falls on that
+    // weekday — see weekdayBefore). An UNPAIRED cycle keeps the
+    // original rule: Final Review = Thursday on/before Board Materials
+    // Ready, Financial Review = 7 days before that.
+    const pairedFC = ANCHORS.financeCommittee.find((fcIso) => {
+      const fcDate = parseISO(fcIso);
+      return (
+        fcDate.getFullYear() === meeting.getFullYear() &&
+        fcDate.getMonth() === meeting.getMonth() &&
+        fcDate < meeting
+      );
+    });
 
-    const financialReviewDate = addDays(finalReviewDate, -7);
+    let finalReviewDate, financialReviewDate;
+    if (pairedFC) {
+      const fcDate = parseISO(pairedFC);
+      finalReviewDate = tuesdayBefore(fcDate);
+      financialReviewDate = thursdayBefore(fcDate);
+    } else {
+      finalReviewDate = thursdayOnOrBefore(materials.date);
+      financialReviewDate = addDays(finalReviewDate, -7);
+    }
+    // Both land on guaranteed weekdays (Tuesday/Thursday), so neither
+    // ever needs a weekend roll.
+    const finalReview = applyOverride("finalFinancialReview", iso, { date: finalReviewDate, adjusted: false });
     const financialReview = applyOverride("financialReview", iso, { date: financialReviewDate, adjusted: false });
 
     // Staffing Model Updates Due = Financial Review date minus 3 days

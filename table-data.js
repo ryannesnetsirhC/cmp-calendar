@@ -70,6 +70,17 @@ const ANCHORS = {
   ],
 };
 
+// Board Meeting dates listed here get NONE of the usual lead-up items
+// (Board Materials Ready, Final Financial Review, Financial Review,
+// Staffing Model Updates Due, SpEd Sheet Updates Due, Principal Meeting,
+// Principal Materials Ready, Payroll/HR Check In, Coding Check In) —
+// those cells are just left blank for that cycle. The Board Meeting
+// date itself still shows normally. Use this for one-off/special
+// meetings that don't follow the normal prep cycle.
+const SKIP_LEADUP = new Set([
+  "2026-11-14", // Special Saturday board meeting — no standard lead-up items
+]);
+
 // School Holidays and Network Closures from the board-approved 2026-27
 // Network School Calendar — used to flag dates with a †, never to move
 // them. "type: holiday" = School Holiday (salmon/* on the official

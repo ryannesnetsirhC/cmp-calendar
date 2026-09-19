@@ -111,6 +111,24 @@ function computeCycles() {
   const boardCycles = ANCHORS.boardMeetings.map((iso) => {
     const meeting = parseISO(iso);
 
+    // Meetings in SKIP_LEADUP (table-data.js) get none of the usual
+    // lead-up items — just the Board Meeting date itself.
+    if (SKIP_LEADUP.has(iso)) {
+      const blank = (col) => ({ date: null, adjusted: false, naturalISO: "", anchorISO: iso, col, skip: true });
+      return {
+        boardMeeting: { date: meeting, adjusted: false, anchorISO: iso, col: "boardMeeting" },
+        boardMaterials: blank("boardMaterials"),
+        finalFinancialReview: blank("finalFinancialReview"),
+        financialReview: blank("financialReview"),
+        staffingModel: blank("staffingModel"),
+        spedSheetUpdatesDue: blank("spedSheetUpdatesDue"),
+        principalMeeting: blank("principalMeeting"),
+        principalMaterials: blank("principalMaterials"),
+        payrollCheckIn: blank("payrollCheckIn"),
+        codingCheckIn: blank("codingCheckIn"),
+      };
+    }
+
     const rawMaterials = addDays(meeting, -3);
     const materials = applyOverride("boardMaterials", iso, rollToFriday(rawMaterials));
 

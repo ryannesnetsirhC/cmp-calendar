@@ -130,18 +130,25 @@
     };
   });
 
+  // Cycles in SKIP_LEADUP (table-data.js) have their lead-up items
+  // flagged with skip:true — leave those out entirely rather than
+  // rendering an editable (or "+ Add") cell for them.
+  function pushUnlessSkipped(bucket, key, item) {
+    if (!item.skip) bucket[key].push(item);
+  }
+
   boardCycles.forEach((c) => {
     const bucket = rows[monthNameOf(c.boardMeeting.date)];
     bucket.boardMeeting.push(c.boardMeeting);
-    bucket.boardMaterials.push(c.boardMaterials);
-    bucket.finalFinancialReview.push(c.finalFinancialReview);
-    bucket.financialReview.push(c.financialReview);
-    bucket.staffingModel.push(c.staffingModel);
-    bucket.spedSheetUpdatesDue.push(c.spedSheetUpdatesDue);
-    bucket.principalMeeting.push(c.principalMeeting);
-    bucket.principalMaterials.push(c.principalMaterials);
-    bucket.payrollCheckIn.push(c.payrollCheckIn);
-    bucket.codingCheckIn.push(c.codingCheckIn);
+    pushUnlessSkipped(bucket, "boardMaterials", c.boardMaterials);
+    pushUnlessSkipped(bucket, "finalFinancialReview", c.finalFinancialReview);
+    pushUnlessSkipped(bucket, "financialReview", c.financialReview);
+    pushUnlessSkipped(bucket, "staffingModel", c.staffingModel);
+    pushUnlessSkipped(bucket, "spedSheetUpdatesDue", c.spedSheetUpdatesDue);
+    pushUnlessSkipped(bucket, "principalMeeting", c.principalMeeting);
+    pushUnlessSkipped(bucket, "principalMaterials", c.principalMaterials);
+    pushUnlessSkipped(bucket, "payrollCheckIn", c.payrollCheckIn);
+    pushUnlessSkipped(bucket, "codingCheckIn", c.codingCheckIn);
   });
 
   fcCycles.forEach((c) => {

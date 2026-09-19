@@ -201,10 +201,11 @@ const MONTH_ORDER_INFO = [
 // View and hit Save Changes again).
 // ---------------------------------------------------------------------
 const OVERRIDES = {
-  // Example: staffingModel: { "2026-10-12": "2026-10-08" },
+  staffingModel: {
+    "2026-10-12": "2026-09-15",
+    "2026-11-09": "2026-10-12",
+  },
 };
 
-// Freeform Notes column text, one entry per month row.
 const NOTES_OVERRIDES = {
-  // Example: "October": "Board retreat this month.",
 };

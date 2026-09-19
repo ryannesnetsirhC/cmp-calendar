@@ -129,23 +129,25 @@ const TABLE_META = {
   footnote: "Board Meetings: 9am–12pm  •  * = moved from a weekend to the prior Friday   † = falls on a school holiday or network closure day  •  ‡ = tentative, subject to change  •  🟧 due within 5 days   🟨 due within 10 days",
 };
 
-// Column order, left to right. "role" tags which position-type filter
-// a column belongs to (null = only shows under "All").
+// Column order, left to right — walking backward from Board Meeting
+// (farthest right) through the items that lead up to it. Payroll/HR and
+// Coding Check In aren't part of that lead-up chain, so they sit at the
+// far left as background admin items.
 const TABLE_COLUMNS = [
-  { key: "docsToVertex", label: "Documents due to Vertex", owner: "Kosha/AP", cadence: "6 Days Prior", role: "koshaap" },
-  { key: "acctClose", label: "Accounting Close", owner: "Vertex", cadence: "Varies", role: null },
-  { key: "staffingModel", label: "Staffing Model Updates Due", owner: "HR", cadence: "3 Days Prior", role: "hr" },
+  { key: "payrollCheckIn", label: "Payroll/HR Check In", owner: "Sinnai/Meghan/Vertex", cadence: "", role: "hr" },
+  { key: "codingCheckIn", label: "Coding Check In", owner: "Kosha/Vertex", cadence: "", role: "koshaap" },
   { key: "spedSheetUpdatesDue", label: "SpEd Sheet Updates Due", owner: "SpEd", cadence: "2 Business Days Prior", role: "sped" },
+  { key: "staffingModel", label: "Staffing Model Updates Due", owner: "HR", cadence: "3 Days Prior", role: "hr" },
   { key: "financialReview", label: "Financial Review", owner: "Varies", cadence: "Thursday", role: null },
+  { key: "finalFinancialReview", label: "Final Financial Review", owner: "Matt/Vertex", cadence: "Thursday", role: "matt" },
   { key: "principalMaterials", label: "Principal Materials Ready", owner: "Vertex", cadence: "Thursday", role: "principals" },
   { key: "principalMeeting", label: "Principal Meeting", owner: "Vertex, Principals", cadence: "Friday", role: "principals" },
   { key: "financeCommitteeMaterials", label: "Finance Committee Materials Ready", owner: "Vertex", cadence: "1 Day Prior", role: null },
-  { key: "finalFinancialReview", label: "Final Financial Review", owner: "Matt/Vertex", cadence: "Thursday", role: "matt" },
   { key: "financeCommittee", label: "Finance Committee", owner: "Vertex, Finance Committee", cadence: "", role: null },
+  { key: "docsToVertex", label: "Documents due to Vertex", owner: "Kosha/AP", cadence: "6 Days Prior", role: "koshaap" },
+  { key: "acctClose", label: "Accounting Close", owner: "Vertex", cadence: "Varies", role: null },
   { key: "boardMaterials", label: "Board Materials Ready", owner: "Vertex", cadence: "3 Days Prior", role: null },
   { key: "boardMeeting", label: "Board Meeting", owner: "", cadence: "", role: null },
-  { key: "payrollCheckIn", label: "Payroll/HR Check In", owner: "Sinnai/Meghan/Vertex", cadence: "", role: "hr" },
-  { key: "codingCheckIn", label: "Coding Check In", owner: "Kosha/Vertex", cadence: "", role: "koshaap" },
 ];
 
 // Every column is editable in Table View except these two.

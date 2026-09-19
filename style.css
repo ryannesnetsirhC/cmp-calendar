@@ -348,6 +348,9 @@ body {
 
 .table-scroll {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: calc(100vh - 260px);
+  min-height: 260px;
   border: 1px solid var(--cmp-border);
   border-radius: 8px;
 }
@@ -382,7 +385,10 @@ body {
   white-space: normal;
   line-height: 1.25;
   position: sticky;
-  top: 0;
+  /* Set per-row by table.js (applyStickyHeaderOffsets), since row
+     heights vary with text wrapping — falls back to 0 if JS hasn't run. */
+  top: var(--sticky-top, 0px);
+  z-index: 2;
 }
 .grid-table thead tr:nth-child(2) th,
 .grid-table thead tr:nth-child(3) th {
@@ -393,6 +399,8 @@ body {
 }
 .grid-table thead th.corner {
   background: var(--cmp-green-dark);
+  left: 0;
+  z-index: 3;
 }
 .grid-table td.month-cell {
   font-weight: 700;
@@ -400,6 +408,7 @@ body {
   background: var(--cmp-cream);
   position: sticky;
   left: 0;
+  z-index: 1;
   white-space: nowrap;
 }
 .grid-table td:last-child {
@@ -455,6 +464,15 @@ body {
   margin: 12px 2px 0;
   font-size: 0.82rem;
   color: var(--cmp-muted);
+}
+
+/* A month row where every date has already passed dims out — still
+   fully clickable/editable, just visually out of the way. */
+tr.row-past {
+  opacity: 0.5;
+}
+tr.row-past td.month-cell {
+  background: var(--cmp-cream);
 }
 
 /* ---------- Editable cells (Table View) ---------- */

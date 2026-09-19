@@ -197,10 +197,40 @@
   theadOwners.innerHTML = ownersHtml;
   theadCadence.innerHTML = cadenceHtml;
 
+  // The 3 header rows stack (sticky) in whatever order they appear in
+  // table.html. Row heights vary with text wrapping, so each row's
+  // sticky "top" offset is measured from actual layout rather than
+  // hardcoded, via the --sticky-top custom property each th reads.
+  function applyStickyHeaderOffsets() {
+    let offset = 0;
+    document.querySelectorAll(".grid-table thead tr").forEach((tr) => {
+      tr.style.setProperty("--sticky-top", offset + "px");
+      offset += tr.getBoundingClientRect().height;
+    });
+  }
+  applyStickyHeaderOffsets();
+
+  // A month row is "past" once every date it holds is behind today —
+  // rows with no dates at all (nothing scheduled that month) don't count.
+  function isRowFullyPast(r) {
+    let hasAny = false;
+    let allPast = true;
+    Object.keys(r).forEach((key) => {
+      r[key].forEach((d) => {
+        if (d && d.date) {
+          hasAny = true;
+          if (daysUntil(d.date) >= 0) allPast = false;
+        }
+      });
+    });
+    return hasAny && allPast;
+  }
+
   // ---- Render body ----
   let bodyHtml = "";
   MONTH_ORDER.forEach((month) => {
     const r = rows[month];
+    const rowCls = isRowFullyPast(r) ? " class=\"row-past\"" : "";
     let cells = `<td class="month-cell">${month}</td>`;
     TABLE_COLUMNS.forEach((col) => {
       const cls = roleClass(col.role);
@@ -208,7 +238,7 @@
       cells += `<td class="${cls}">${content}</td>`;
     });
     cells += `<td>${renderNotesCell(month)}</td>`;
-    bodyHtml += `<tr>${cells}</tr>`;
+    bodyHtml += `<tr${rowCls}>${cells}</tr>`;
   });
   tbody.innerHTML = bodyHtml;
 
@@ -243,12 +273,28 @@
     }
   }
 
+  // Re-checks a row's "fully past" status from its inputs' live values
+  // (used after an edit — the initial render uses isRowFullyPast above).
+  function refreshRowPastState(tr) {
+    let hasAny = false;
+    let allPast = true;
+    tr.querySelectorAll(".cell-input[data-col]").forEach((input) => {
+      if (input.value) {
+        hasAny = true;
+        if (daysUntil(parseISO(input.value)) >= 0) allPast = false;
+      }
+    });
+    tr.classList.toggle("row-past", hasAny && allPast);
+  }
+
   function closeEditor(input) {
     refreshDisplay(input);
     const wrap = input.closest(".cell-edit");
     const span = wrap && wrap.querySelector(".cell-display");
     input.hidden = true;
     if (span) span.hidden = false;
+    const tr = input.closest("tr");
+    if (tr) refreshRowPastState(tr);
   }
 
   tbody.addEventListener("click", (e) => {
